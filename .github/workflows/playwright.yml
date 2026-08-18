@@ -41,3 +41,29 @@ jobs:
         name: playwright-report
         path: playwright-report/
         retention-days: 30
+
+    - name: Criar bug no Jira em caso de falha
+      if: failure()
+      run: |
+        curl --fail -X POST \
+          -H "Content-Type: application/json" \
+          -u "${{ secrets.JIRA_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}" \
+          --data '{
+            "fields": {
+              "project": { "key": "${{ secrets.JIRA_PROJECT_KEY }}" },
+              "summary": "Falha na pipeline Playwright - run #${{ github.run_number }}",
+              "issuetype": { "name": "Bug" },
+              "description": {
+                "type": "doc",
+                "version": 1,
+                "content": [{
+                  "type": "paragraph",
+                  "content": [{
+                    "type": "text",
+                    "text": "A execução automatizada de testes falhou.\n\nCommit: ${{ github.sha }}\nWorkflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                  }]
+                }]
+              }
+            }
+          }' \
+          "${{ secrets.JIRA_BASE_URL }}/rest/api/3/issue"

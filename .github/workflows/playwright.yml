@@ -45,7 +45,7 @@ jobs:
     - name: Criar bug no Jira em caso de falha
       if: failure()
       run: |
-        curl --fail -X POST \
+        response=$(curl -s -w "\n%{http_code}" -X POST \
           -H "Content-Type: application/json" \
           -u "${{ secrets.JIRA_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}" \
           --data '{
@@ -66,4 +66,11 @@ jobs:
               }
             }
           }' \
-          "${{ secrets.JIRA_BASE_URL }}/rest/api/3/issue"
+          "${{ secrets.JIRA_BASE_URL }}/rest/api/3/issue")
+        http_code=$(echo "$response" | tail -n1)
+        body=$(echo "$response" | sed '$d')
+        echo "HTTP status: $http_code"
+        echo "Resposta: $body"
+        if [ "$http_code" -ge 400 ]; then
+          exit 1
+        fi

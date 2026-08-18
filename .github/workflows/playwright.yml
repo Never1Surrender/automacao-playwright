@@ -1,0 +1,42 @@
+name: Playwright Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    steps:
+    - name: Baixar o código do repositório
+      uses: actions/checkout@v4
+
+    # 1. Configurar o Bun (ou Node.js) no servidor da nuvem
+    - name: Configurar o Bun
+      uses: oven-sh/setup-bun@v1
+      with:
+        bun-version: latest
+
+    # 2. Instalar as dependências do projeto
+    - name: Instalar dependências
+      run: bun install
+
+    # 3. Baixar os navegadores do Playwright na máquina virtual
+    - name: Instalar navegadores do Playwright
+      run: bunx playwright install --with-deps
+
+    # 4. Executar os testes em modo headless (segundo plano)
+    - name: Executar testes automatizados
+      run: bunx playwright test
+
+    # 5. Salvar o relatório de execução mesmo se houver falha
+    - name: Salvar relatório de testes
+      uses: actions/upload-artifact@v4
+      if: ${{ !cancelled() }}
+      with:
+        name: playwright-report
+        path: playwright-report/
+        retention-days: 30

@@ -27,6 +27,12 @@ jobs:
 
     - name: Executar testes automatizados (Chromium)
       run: bunx playwright test --project=chromium
+      env:
+        BASE_URL: ${{ secrets.BASE_URL }}
+        TEST_EMAIL_CADASTRADO: ${{ secrets.TEST_EMAIL_CADASTRADO }}
+        TEST_SENHA_CADASTRADA: ${{ secrets.TEST_SENHA_CADASTRADA }}
+        TEST_EMAIL_INVALIDO: ${{ secrets.TEST_EMAIL_INVALIDO }}
+        TEST_SENHA_INCORRETA: ${{ secrets.TEST_SENHA_INCORRETA }}
 
     - name: Salvar relatório de testes
       uses: actions/upload-artifact@v4

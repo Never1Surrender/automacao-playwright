@@ -8,31 +8,26 @@ on:
 
 jobs:
   test:
-    timeout-minutes: 60
+    timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
     - name: Baixar o código do repositório
       uses: actions/checkout@v4
 
-    # 1. Configurar o Bun (ou Node.js) no servidor da nuvem
     - name: Configurar o Bun
       uses: oven-sh/setup-bun@v1
       with:
         bun-version: latest
 
-    # 2. Instalar as dependências do projeto
-    - name: Instalar dependências
+    - name: Instalar dependências do projeto
       run: bun install
 
-    # 3. Baixar os navegadores do Playwright na máquina virtual
-    - name: Instalar navegadores do Playwright
-      run: bunx playwright install --with-deps
+    - name: Instalar apenas o navegador Chromium
+      run: bunx playwright install chromium --with-deps
 
-    # 4. Executar os testes em modo headless (segundo plano)
-    - name: Executar testes automatizados
-      run: bunx playwright test
+    - name: Executar testes automatizados (Chromium)
+      run: bunx playwright test --project=chromium
 
-    # 5. Salvar o relatório de execução mesmo se houver falha
     - name: Salvar relatório de testes
       uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Guia Prático de Automação de QA</title>
+  <style>
+    @media print {
+      body { margin: 0; padding: 15mm; font-size: 11pt; }
+      .page-break { page-break-before: always; }
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #24292e;
+      line-height: 1.5;
+      max-width: 850px;
+      margin: 20px auto;
+      padding: 20px;
+    }
+    h1 { color: #0366d6; border-bottom: 2px solid #eaecef; padding-bottom: 8px; font-size: 20pt; }
+    h2 { color: #24292e; border-bottom: 1px solid #eaecef; padding-bottom: 6px; margin-top: 24px; font-size: 14pt; }
+    h3 { color: #444d56; font-size: 12pt; margin-top: 16px; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 10pt; }
+    th, td { border: 1px solid #dfe2e5; padding: 6px 10px; text-align: left; }
+    th { background-color: #f6f8fa; font-weight: 600; }
+    pre { background-color: #f6f8fa; border: 1px solid #e1e4e8; border-radius: 4px; padding: 10px; font-family: "SFMono-Regular", Consolas, Courier, monospace; font-size: 9.5pt; overflow-x: auto; }
+    code { font-family: "SFMono-Regular", Consolas, Courier, monospace; background-color: rgba(27,31,35,0.05); padding: 2px 4px; border-radius: 3px; font-size: 9pt; }
+    .badge { background-color: #e1f5fe; color: #0277bd; padding: 2px 6px; border-radius: 4px; font-size: 8.5pt; font-weight: bold; }
+    blockquote { border-left: 4px solid #0366d6; margin: 0; padding-left: 10px; color: #586069; }
+  </style>
+</head>
+<body>
+
+  <h1>GUIA PRÁTICO DE AUTOMAÇÃO DE QA</h1>
+  <p><em>Resumo de Conceitos, Comandos de Terminal, Estratégia e Playwright</em></p>
+
+  <h2>1. Conceitos de Engenharia de Qualidade</h2>
+  
+  <h3>A Pirâmide de Testes</h3>
+  <ul>
+    <li><strong>Topo (E2E / Interface):</strong> Mais lentos e caros. Simulam a jornada real do usuário no navegador (ex: Playwright, Cypress).</li>
+    <li><strong>Meio (Serviços / APIs):</strong> Rápidos e estáveis. Testam integração e regras de negócio sem interface gráfica.</li>
+    <li><strong>Base (Unidade):</strong> Ultrarrápidos e em grande quantidade. Focados em funções isoladas de código (feitos pelos desenvolvedores).</li>
+  </ul>
+
+  <h3>Caminhos Críticos (Critical Path)</h3>
+  <blockquote>
+    <strong>Pergunta de ouro:</strong> "Se essa funcionalidade quebrar em produção agora, a empresa para de faturar ou o usuário fica impedido de acessar o produto?"
+  </blockquote>
+  <ul>
+    <li><strong>Prioridade Máxima E2E:</strong> Checkout/Compra, Pagamento, Login e Criação de Conta.</li>
+    <li><strong>Evitar no E2E:</strong> Textos estáticos de rodapé e validações exaustivas de formulário (devem ser validadas em testes unitários).</li>
+  </ul>
+
+  <h3>CI/CD e Pipelines</h3>
+  <ul>
+    <li><strong>Pipeline:</strong> Esteira automatizada de execução na nuvem.</li>
+    <li><strong>CI (Continuous Integration):</strong> Roda os testes de QA automaticamente a cada código novo enviado pelos desenvolvedores, funcionando como trava de segurança.</li>
+    <li><strong>CD (Continuous Delivery):</strong> Publica a versão em produção automaticamente assim que todos os testes da esteira passam com sucesso (🟢).</li>
+  </ul>
+
+  <h2>2. Comandos Essenciais do Terminal (Linux)</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Ação</th>
+        <th>Comando</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Criar e entrar na pasta</td>
+        <td><code>mkdir meu-projeto &amp;&amp; cd meu-projeto</code></td>
+      </tr>
+      <tr>
+        <td>Instalar Playwright</td>
+        <td><code>npm init playwright@latest</code></td>
+      </tr>
+      <tr>
+        <td>Gravar ações na tela (Codegen)</td>
+        <td><code>npx playwright codegen https://site.com</code></td>
+      </tr>
+      <tr>
+        <td>Executar em Modo Visual (UI Mode)</td>
+        <td><code>npx playwright test --ui</code></td>
+      </tr>
+      <tr>
+        <td>Rodar com navegador visível</td>
+        <td><code>npx playwright test login.spec.js --headed</code></td>
+      </tr>
+      <tr>
+        <td>Rodar em câmera lenta (1s)</td>
+        <td><code>npx playwright test --headed --slow-mo=1000</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="page-break"></div>
+
+  <h2>3. Seletores e Acessibilidade (Locators)</h2>
+
+  <h3>A. Papéis de Acessibilidade (Playwright)</h3>
+  <pre><code>// Botão
+await page.getByRole('button', { name: 'Login' }).click();
+
+// Link de navegação
+await page.getByRole('link', { name: 'Signup / Login' }).click();
+
+// Campo de texto / Input
+await page.getByRole('textbox', { name: 'Email Address' }).fill('thais@teste.com');
+
+// Radio Button (Marcar bolinha)
+await page.getByRole('radio', { name: 'Mrs.' }).check();
+
+// Select / Lista Suspensa
+await page.getByLabel('Country *').selectOption('United States');</code></pre>
+
+  <h3>B. Hierarquia Universal de Seletores (HTML / DevTools)</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Prioridade</th>
+        <th>Tipo</th>
+        <th>Sintaxe</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="badge">1º (Ideal)</span></td>
+        <td>Atributo de Teste</td>
+        <td><code>[data-qa="login-email"]</code> ou <code>[data-testid="..."]</code></td>
+      </tr>
+      <tr>
+        <td><span class="badge">2º</span></td>
+        <td>ID Único</td>
+        <td><code>#id-do-elemento</code></td>
+      </tr>
+      <tr>
+        <td><span class="badge">3º</span></td>
+        <td>Atributo Name</td>
+        <td><code>[name="email"]</code></td>
+      </tr>
+      <tr>
+        <td><span class="badge">4º</span></td>
+        <td>XPath por Texto</td>
+        <td><code>//button[text()='Login']</code></td>
+      </tr>
+      <tr>
+        <td><span class="badge">5º (Evitar)</span></td>
+        <td>Classe CSS</td>
+        <td><code>.btn-submit-v2</code> (Frágil a mudanças de layout)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>4. Scripts Prontos de Referência</h2>
+
+  <h3>Login com Validação de Erro</h3>
+  <pre><code>import { test, expect } from '@playwright/test';
+
+test('Tentativa de login com credenciais incorretas', async ({ page }) => {
+  // 1. Arrange & Act
+  await page.goto('https://automationexercise.com');
+  await page.getByRole('link', { name: 'Signup / Login' }).click();
+
+  // 2. Preenchimento
+  await page.locator('form').filter({ hasText: 'Login' }).getByPlaceholder('Email Address').fill('invalido@teste.com');
+  await page.getByRole('textbox', { name: 'Password' }).fill('senhaIncorreta123');
+  await page.getByRole('button', { name: 'Login' }).click();
+
+  // 3. Assert (Validação)
+  const mensagemErro = page.locator('p', { hasText: 'Your email or password is incorrect!' });
+  await expect(mensagemErro).toBeVisible();
+});</code></pre>
+
+  <h3>Cadastro com E-mail Dinâmico (Timestamp)</h3>
+  <pre><code>import { test, expect } from '@playwright/test';
+
+test('Cadastro de novo usuário', async ({ page }) => {
+  // Evita erro de email duplicado
+  const emailUnico = `thais_${Date.now()}@teste.com`;
+
+  await page.goto('https://automationexercise.com/');
+  await page.getByRole('link', { name: 'Signup / Login' }).click();
+
+  await page.getByRole('textbox', { name: 'Name' }).fill('Thais');
+  await page.locator('form').filter({ hasText: 'Signup' }).getByPlaceholder('Email Address').fill(emailUnico);
+  await page.getByRole('button', { name: 'Signup' }).click();
+
+  // Formulário de Conta
+  await page.getByRole('radio', { name: 'Mrs.' }).check();
+  await page.getByRole('textbox', { name: 'Password *' }).fill('@Diario123!');
+  await page.locator('#days').selectOption('5');
+  await page.locator('#months').selectOption('5');
+  await page.locator('#years').selectOption('2000');
+
+  // Endereço
+  await page.getByRole('textbox', { name: 'First name *' }).fill('Thais');
+  await page.getByRole('textbox', { name: 'Last name *' }).fill('Araujo');
+  await page.getByRole('textbox', { name: 'Address * (Street address, P.' }).fill('Rua dos Testes, 123');
+  await page.getByLabel('Country *').selectOption('United States');
+  await page.getByRole('textbox', { name: 'State *' }).fill('California');
+  await page.getByRole('textbox', { name: 'City * Zipcode *' }).fill('Los Angeles');
+  await page.locator('#zipcode').fill('90001');
+  await page.getByRole('textbox', { name: 'Mobile Number *' }).fill('11999998888');
+
+  await page.getByRole('button', { name: 'Create Account' }).click();
+
+  // Validação
+  await expect(page.getByText('Account Created!')).toBeVisible();
+});</code></pre>
+
+</body>
+</html>

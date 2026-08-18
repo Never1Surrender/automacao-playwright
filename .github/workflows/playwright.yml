@@ -42,26 +42,9 @@ jobs:
         path: playwright-report/
         retention-days: 30
 
-    - name: Criar bug no Jira em caso de falha
+    - name: Criar issue no Jira em caso de falha
       if: failure()
       run: |
-        echo "== Testando autenticação (/myself) =="
-        auth_response=$(curl -s -w "\n%{http_code}" \
-          -u "${{ secrets.JIRA_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}" \
-          "${{ secrets.JIRA_BASE_URL }}/rest/api/3/myself")
-        echo "$auth_response"
-
-        echo "== Testando permissões no projeto =="
-        perm_response=$(curl -s -w "\n%{http_code}" \
-          -u "${{ secrets.JIRA_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}" \
-          "${{ secrets.JIRA_BASE_URL }}/rest/api/3/mypermissions?projectKey=${{ secrets.JIRA_PROJECT_KEY }}&permissions=CREATE_ISSUES")
-        echo "$perm_response"
-
-        echo "== Listando tipos de issue do projeto =="
-        curl -s -u "${{ secrets.JIRA_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}" \
-          "${{ secrets.JIRA_BASE_URL }}/rest/api/3/issue/createmeta?projectKeys=${{ secrets.JIRA_PROJECT_KEY }}&expand=projects.issuetypes"
-
-        echo "== Criando issue =="
         response=$(curl -s -w "\n%{http_code}" -X POST \
           -H "Content-Type: application/json" \
           -u "${{ secrets.JIRA_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}" \
@@ -69,7 +52,7 @@ jobs:
             "fields": {
               "project": { "key": "${{ secrets.JIRA_PROJECT_KEY }}" },
               "summary": "Falha na pipeline Playwright - run #${{ github.run_number }}",
-              "issuetype": { "name": "Bug" },
+              "issuetype": { "name": "Tarefa" },
               "description": {
                 "type": "doc",
                 "version": 1,

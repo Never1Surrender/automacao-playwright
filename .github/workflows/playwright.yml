@@ -52,7 +52,7 @@ jobs:
             "fields": {
               "project": { "key": "${{ secrets.JIRA_PROJECT_KEY }}" },
               "summary": "Falha na pipeline Playwright - run #${{ github.run_number }}",
-              "issuetype": { "name": "Tarefa" },
+              "issuetype": { "name": "Bug" },
               "description": {
                 "type": "doc",
                 "version": 1,
